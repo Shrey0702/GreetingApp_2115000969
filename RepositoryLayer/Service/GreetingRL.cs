@@ -7,7 +7,11 @@ using System.Threading.Tasks;
 
 namespace RepositoryLayer.Service
 {
-    class GreetingRL:IGreetingRL
+    public class GreetingRL : IGreetingRL
     {
+        public string GetGreetingRL()
+        {
+            return "Greetings from repository layer using GetGreeting get request from controller";
+        }
     }
 }

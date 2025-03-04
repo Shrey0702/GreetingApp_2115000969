@@ -1,3 +1,8 @@
+using BusinessLayer.Interface;
+using BusinessLayer.Service;
+using RepositoryLayer.Interface;
+using RepositoryLayer.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,6 +14,11 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
+
+
+builder.Services.AddControllers();
+builder.Services.AddScoped<IGreetingBL, GreetingBL>();
+builder.Services.AddScoped<IGreetingRL, GreetingRL>();
 
 // Configure the HTTP request pipeline.
 

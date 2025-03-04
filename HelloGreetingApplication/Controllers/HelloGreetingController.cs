@@ -1,3 +1,5 @@
+using BusinessLayer.Interface;
+using BusinessLayer.Service;
 using Microsoft.AspNetCore.Mvc;
 using ModelLayer.Model;
 
@@ -8,57 +10,153 @@ namespace HelloGreetingApplication.Controllers;
 public class HelloGreetingController : ControllerBase
 {
 
+    /// <summary>
+    /// Creating referance of IGreetingBL
+    /// </summary>
+    IGreetingBL _greetingBl;
+    ILogger<HelloGreetingController> _logger;
 
-    [HttpGet]
-    public  IActionResult Get()
+    public HelloGreetingController(IGreetingBL greetingBl, ILogger<HelloGreetingController> logger)
     {
-        ResponseModel<string> response = new ResponseModel<string>();
-        response.Message = "Get method successfully applied";
-        response.Success = true;
-        response.Data = "Hello Greeting";
-        return Ok(response);
+        _greetingBl = greetingBl;
+        _logger = logger;
     }
 
+
+    /// <summary>
+    /// Get method to get the greeting message
+    /// </summary>
+    /// <returns>Hello Greeting</returns>
+    [HttpGet]
+    public IActionResult Get()
+    {
+        try
+        {
+            _logger.LogInformation("Get Greeting method called");
+            ResponseModel<string> response = new ResponseModel<string>();
+            string greeting = _greetingBl.GetGreetingBL();
+            response.Message = "Get method successfully applied";
+            response.Success = true;
+            response.Data = greeting;
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Exception Occured in GetGreeting {e.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Get method failed";
+            response.Success = false;
+            response.Data = e.Message;
+            return BadRequest(response);
+        }
+    }
+    /// <summary>
+    /// Post method to register the user
+    /// </summary>
+    /// <param name="userRegistration"></param>
     [HttpPost]
     public IActionResult Post(UserRegistrationModel userRegistration)
     {
-        ResponseModel<string> response = new ResponseModel<string>();
-        response.Message = "Post method successfully applied";
-        response.Success = true;
-        response.Data = $"user first name: {userRegistration.FirstName}, last name:{userRegistration.LastName}, email: {userRegistration.Email}";
-        return Ok(response);
+        try
+        {
+            _logger.LogInformation("Post method called");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Post method successfully applied";
+            response.Success = true;
+            response.Data = $"user first name: {userRegistration.FirstName}, last name:{userRegistration.LastName}, email: {userRegistration.Email}";
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Exception Occured in Post method {e.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Post method failed";
+            response.Success = false;
+            response.Data = e.Message;
+            return BadRequest(response);
+        }
     }
-
+    /// <summary>
+    /// Put method to update the user data
+    /// </summary>
+    /// <param name="userUpdate"></param>
     [HttpPut]
     public IActionResult Put(UserRegistrationModel userUpdate)
     {
-        ResponseModel<string> response = new ResponseModel<string>();
-        response.Message = "Put method successfully applied";
-        response.Success = true;
-        response.Data = $"The data after updating user at the database-- user first name: {userUpdate.FirstName}, last name:{userUpdate.LastName}, email: {userUpdate.Email}";
-        return Ok(response);
+        try
+        {
+            _logger.LogInformation("Put method called");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Put method successfully applied";
+            response.Success = true;
+            response.Data = $"The data after updating user at the database-- user first name: {userUpdate.FirstName}, last name:{userUpdate.LastName}, email: {userUpdate.Email}";
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Exception Occured in Put method {e.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Put method failed";
+            response.Success = false;
+            response.Data = e.Message;
+            return BadRequest(response);
+        }
     }
-
+    /// <summary>
+    /// Patch method to update the user data
+    /// </summary>
+    /// <param name="userPatch"></param>
+    /// <returns></returns>
     [HttpPatch]
     public IActionResult Patch(UserUpdationModel userPatch)
     {
-        ResponseModel<string> response = new ResponseModel<string>();
-        response.Message = "Patch method successfully applied";
-        response.Success = true;
-        response.Data = $"The data after patching user data at the database-- user first name: {userPatch.FirstName}, last name:{userPatch.LastName}, email: {userPatch.Email}";
-        return Ok(response);
+        try
+        {
+            _logger.LogInformation("Patch method called");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Patch method successfully applied";
+            response.Success = true;
+            response.Data = $"The data after patching user data at the database-- user first name: {userPatch.FirstName}, last name:{userPatch.LastName}, email: {userPatch.Email}";
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception Occured in Patch method {ex.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Patch method failed";
+            response.Success = false;
+            response.Data = ex.Message;
+            return BadRequest(response);
+        }
     }
-    
+    /// <summary>
+    /// Delete method to delete the user data
+    /// </summary>
+    /// <param name="userDeletion"></param>
+    /// <returns></returns>
 
     [HttpDelete]
     public IActionResult Delete(UserRegistrationModel userDeletion)
     {
-        ResponseModel<string> response = new ResponseModel<string>();
-        response.Message = "Delete method successfully applied";
-        response.Success = true;
-        response.Data = $"The user with email: {userDeletion.Email} is deleted";
-        return Ok(response);
+        try
+        {
+            _logger.LogInformation("Delete method called");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Delete method successfully applied";
+            response.Success = true;
+            response.Data = $"The user with email: {userDeletion.Email} is deleted";
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception Occured in Delete method {ex.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Delete method failed";
+            response.Success = false;
+            response.Data = ex.Message;
+            return BadRequest(response);
+        }
     }
 
-    
+
 }
