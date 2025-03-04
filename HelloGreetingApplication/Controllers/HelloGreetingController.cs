@@ -158,6 +158,12 @@ public class HelloGreetingController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Post method to greet the user
+    /// </summary>
+    /// <param name="greetUserModel"></param>
+    /// <returns></returns>
+
     [HttpPost]
     [Route("GreetUser")]
     public IActionResult Post(GreetUserModel greetUserModel)
@@ -166,9 +172,10 @@ public class HelloGreetingController : ControllerBase
         {
             _logger.LogInformation("Trying to run greet method to greet the particualr user");
             ResponseModel<string> response = new ResponseModel<string>();
+            string greetMessage = _greetingBl.DisplayGreetingBL(greetUserModel);
             response.Message = "User Greeted successfully";
             response.Success = true;
-            response.Data = $"Hello {greetUserModel.FirstName} {greetUserModel.LastName} from the GreetingsApplication";
+            response.Data = greetMessage;
             return Ok(response);
         }
         catch (Exception e)

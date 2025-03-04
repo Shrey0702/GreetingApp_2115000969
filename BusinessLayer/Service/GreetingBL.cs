@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Interface;
+using ModelLayer.Model;
 using RepositoryLayer.Interface;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,24 @@ namespace BusinessLayer.Service
         public string GetGreetingBL()
         {
             return greetingRL.GetGreetingRL();
+        }
+
+        /// <summary>
+        /// Method to display the greeting message with user first name and last name
+        /// </summary>
+        /// <param name="greetUserModel"></param>
+        /// <returns></returns>
+
+        public string DisplayGreetingBL(GreetUserModel greetUserModel)
+        {
+            if(greetUserModel.FirstName == string.Empty && greetUserModel.LastName == string.Empty)
+            {
+                return "Hello World!!";
+            }
+            else
+            {
+                return $"Hello {greetUserModel.FirstName} {greetUserModel.LastName}";
+            }
         }
     }
 }
