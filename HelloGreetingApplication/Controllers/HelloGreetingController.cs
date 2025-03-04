@@ -158,5 +158,29 @@ public class HelloGreetingController : ControllerBase
         }
     }
 
+    [HttpPost]
+    [Route("GreetUser")]
+    public IActionResult Post(GreetUserModel greetUserModel)
+    {
+        try
+        {
+            _logger.LogInformation("Trying to run greet method to greet the particualr user");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "User Greeted successfully";
+            response.Success = true;
+            response.Data = $"Hello {greetUserModel.FirstName} {greetUserModel.LastName} from the GreetingsApplication";
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Exception Occured Greet User Method {e.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "There is some error while trying to fetch greet message";
+            response.Success = false;
+            response.Data = e.Message;
+            return BadRequest(response);
+        }
+    }
+
 
 }
