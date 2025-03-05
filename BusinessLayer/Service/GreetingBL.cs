@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Interface;
+using Microsoft.Extensions.Logging;
 using ModelLayer.Model;
 using RepositoryLayer.Interface;
 using System;
@@ -11,6 +12,8 @@ namespace BusinessLayer.Service
 {
     public class GreetingBL : IGreetingBL
     {
+        private readonly ILogger<GreetingBL> _logger;
+
         /// <summary>
         /// Creating referance of IGreetingRL
         /// </summary>
@@ -20,14 +23,17 @@ namespace BusinessLayer.Service
         /// Constructor for dependency injection
         /// </summary>
         /// <param name="greetingRL"></param>
-        public GreetingBL(IGreetingRL greetingRL)
+        public GreetingBL(IGreetingRL greetingRL, ILogger<GreetingBL> logger)
         {
             this.greetingRL = greetingRL;
+            this._logger = logger;
+
         }
 
 
         public string GetGreetingBL()
         {
+            _logger.LogInformation("Trying to get the greeting message");
             return greetingRL.GetGreetingRL();
         }
 
@@ -39,13 +45,32 @@ namespace BusinessLayer.Service
 
         public string DisplayGreetingBL(GreetUserModel greetUserModel)
         {
-            if(greetUserModel.FirstName == string.Empty && greetUserModel.LastName == string.Empty)
+            _logger.LogInformation("Trying to display the greeting message");
+            if (greetUserModel.FirstName == string.Empty && greetUserModel.LastName == string.Empty)
             {
                 return "Hello World!!";
             }
             else
             {
                 return $"Hello {greetUserModel.FirstName} {greetUserModel.LastName}";
+            }
+        }
+        /// <summary>
+        /// Method to save the greeting message to the Database
+        /// </summary>
+        /// <param name="greeting"></param>
+        /// <returns>returns the data which is saved in our database</returns>
+        public string SaveGreetingBL(SaveGreetingModel greeting)
+        {
+            try
+            {
+                _logger.LogInformation("Trying to save the greeting message");
+                return greetingRL.SaveGreetingRL(greeting);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Exception Occured while saving greeting message to the Database {e.Message}");
+                return e.ToString();
             }
         }
     }

@@ -8,9 +8,9 @@ namespace ModelLayer.Model
 {
     public class ResponseModel<T>
     {
-        public string Message { get; set; } = "";
+        public string Message { get; set; } = string.Empty;
         public bool Success { get; set; } = false;
-        public T Data { get; set; } = default(T);
+        public T? Data { get; set; } = default(T);
     }
    
 }

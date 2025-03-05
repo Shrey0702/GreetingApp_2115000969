@@ -189,5 +189,31 @@ public class HelloGreetingController : ControllerBase
         }
     }
 
+    [HttpPost]
+    [Route("SaveGreetings")]
+    public IActionResult Post(SaveGreetingModel greeting)
+    {
+        _logger.LogInformation("Post method called to save the greeting message");
+        try
+        {
+            _logger.LogInformation("Trying to save the greeting message");
+            ResponseModel<string> response = new ResponseModel<string>();
+            string result = _greetingBl.SaveGreetingBL(greeting);
+            response.Message = "Greeting message saved successfully";
+            response.Success = true;
+            response.Data = $"The greeting message saved in the Database is: {result}";
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Exception Occured in Save Greeting Method {e.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "There is some error while trying to save the greeting message";
+            response.Success = false;
+            response.Data = e.Message;
+            return BadRequest(response);
+        }
+    }
+
 
 }
