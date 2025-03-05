@@ -1,6 +1,7 @@
 ﻿using BusinessLayer.Interface;
 using Microsoft.Extensions.Logging;
 using ModelLayer.Model;
+using RepositoryLayer.Entity;
 using RepositoryLayer.Interface;
 using System;
 using System.Collections.Generic;
@@ -73,7 +74,11 @@ namespace BusinessLayer.Service
                 return e.ToString();
             }
         }
-
+        /// <summary>
+        /// Method to get the greeting message by Id
+        /// </summary>
+        /// <param name="iD"></param>
+        /// <returns>returns the data which is saved in the database</returns>
         public string GetGreetingByIdBL(GreetByIdModel iD)
         {
             try
@@ -85,6 +90,24 @@ namespace BusinessLayer.Service
             {
                 _logger.LogError($"Exception Occured while getting greeting message by Id {e.Message}");
                 return e.ToString();
+            }
+        }
+        /// <summary>
+        /// Method to get all the greeting messages
+        /// </summary>
+        /// <returns>A string of all Greeting Messages</returns>
+        public List<GreetingEntity> GetAllGreetingsBL()
+        {
+            try
+            {
+                _logger.LogInformation("Trying to get all the greeting messages");
+                return greetingRL.RetrieveAllGreetingsRL();
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Exception Occured while getting all greeting messages {e.Message}");
+                throw new Exception(e.Message);
             }
         }
     }

@@ -2,6 +2,8 @@ using BusinessLayer.Interface;
 using BusinessLayer.Service;
 using Microsoft.AspNetCore.Mvc;
 using ModelLayer.Model;
+using RepositoryLayer.Context;
+using RepositoryLayer.Entity;
 
 namespace HelloGreetingApplication.Controllers;
 
@@ -218,7 +220,11 @@ public class HelloGreetingController : ControllerBase
             return BadRequest(response);
         }
     }
-
+    /// <summary>
+    /// Post method to get the greeting message by ID
+    /// </summary>
+    /// <param name="iD"></param>
+    /// <returns>returns the greeting message</returns>
     [HttpPost]
     [Route("GetGreetingById")]
     public IActionResult Post(GreetByIdModel iD)
@@ -236,6 +242,34 @@ public class HelloGreetingController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError($"Exception Occured in GetGreeting {e.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Get method failed";
+            response.Success = false;
+            response.Data = e.Message;
+            return BadRequest(response);
+        }
+    }
+    /// <summary>
+    /// Get method to get all the greetings
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("RetrieveAllGreetings")]
+    public IActionResult GetGreetings()
+    {
+        try
+        {
+            _logger.LogInformation("Get Greetings method called");
+            ResponseModel<List<GreetingEntity>> response = new ResponseModel<List<GreetingEntity>>();
+            var greetings = _greetingBl.GetAllGreetingsBL();
+            response.Message = "Get method successfully applied";
+            response.Success = true;
+            response.Data = greetings;
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Exception Occured in GetGreetings {e.Message}");
             ResponseModel<string> response = new ResponseModel<string>();
             response.Message = "Get method failed";
             response.Success = false;

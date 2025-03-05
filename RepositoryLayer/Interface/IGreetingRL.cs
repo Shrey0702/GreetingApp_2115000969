@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ModelLayer.Model;
+using RepositoryLayer.Entity;
 
 namespace RepositoryLayer.Interface
 {
@@ -12,5 +13,6 @@ namespace RepositoryLayer.Interface
         string GetGreetingByIdRL(GreetByIdModel greetingID);
         public string GetGreetingRL();
         public string SaveGreetingRL(SaveGreetingModel greeting);
+        public List<GreetingEntity> RetrieveAllGreetingsRL();
     }
 }
