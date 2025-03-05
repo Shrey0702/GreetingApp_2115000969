@@ -277,4 +277,46 @@ public class HelloGreetingController : ControllerBase
             return BadRequest(response);
         }
     }
+
+    /// <summary>
+    /// put method to update greeting message
+    /// </summary>
+    /// <returns> </returns>
+    [HttpPut("{id}")]
+    public IActionResult PutGreetings(int id, [FromBody] SaveGreetingModel modifiedGreeting)
+    {
+        try
+        {
+            _logger.LogInformation($"Update Greetings method called for ID: {id}");
+            bool result = _greetingBl.UpdateGreetingMessageBL(id, modifiedGreeting);
+            if (result)
+            {
+                ResponseModel<string> response = new ResponseModel<string>();
+                response.Success = true;
+                response.Message = "Greeting is successfully updated";
+                response.Data = $"{modifiedGreeting.GreetingMessage}";
+                return Ok(response);
+            }
+            else
+            {
+                ResponseModel<string> response = new ResponseModel<string>();
+                response.Success = false;
+                response.Message = "No greeting message is present with that id";
+                response.Data = $"please create a new greeting message before modifying";
+                return NotFound(response);
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Exception occurred in Update Greetings: {e.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Success = false;
+            response.Message = $"an error occured while trying to modify the greeting {e.Message}";
+            response.Data = $"Not able to update greeting currently";
+            return BadRequest(response);
+        }
+    }
+
+
+
 }

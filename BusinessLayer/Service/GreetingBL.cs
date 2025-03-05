@@ -95,7 +95,7 @@ namespace BusinessLayer.Service
         /// <summary>
         /// Method to get all the greeting messages
         /// </summary>
-        /// <returns>A string of all Greeting Messages</returns>
+        /// <returns>returns a string of all Greeting Messages</returns>
         public List<GreetingEntity> GetAllGreetingsBL()
         {
             try
@@ -110,5 +110,26 @@ namespace BusinessLayer.Service
                 throw new Exception(e.Message);
             }
         }
+        /// <summary>
+        /// Method to update the greeting message by Id
+        /// </summary>
+        /// <param name="modifyById"></param>
+        /// <param name="modifiedGreeting"></param>
+        /// <returns>returns bool true if data is successfully modified</returns>
+        public bool UpdateGreetingMessageBL(int id, SaveGreetingModel modifiedGreeting)
+        {
+            try
+            {
+                _logger.LogInformation("Trying to update greeting message by id");
+                return greetingRL.UpdateGreetingMessageRL(id, modifiedGreeting);
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return false;
+            }
+        }
+
     }
 }

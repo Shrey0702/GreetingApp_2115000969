@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ModelLayer.Model;
 using RepositoryLayer.Context;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace RepositoryLayer.Service
 {
@@ -74,7 +75,10 @@ namespace RepositoryLayer.Service
                 return "There's some error occured while trying to save greeting message to the Database";
             }
         }
-
+        /// <summary>
+        /// Method to retrieve all greeting messages from the Database
+        /// </summary>
+        /// <returns>returns all the greetings in the database</returns>
         public List<GreetingEntity> RetrieveAllGreetingsRL()
         {
             try
@@ -98,5 +102,35 @@ namespace RepositoryLayer.Service
                 throw new Exception(e.Message);
             }
         }
+        /// <summary>
+        /// Method to update the greeting message in the Database
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="modifiedGreeting"></param>
+        /// <returns>returns true after successfull updation else false</returns>
+        public bool UpdateGreetingMessageRL(int id, SaveGreetingModel modifiedGreeting)
+        {
+            try
+            {
+                _logger.LogInformation($"Trying to update greeting message in the Database for ID: {id}");
+                var greeting = _context.GreetingEntities.FirstOrDefault(g => g.GreetingID == id);
+                if (greeting == null)
+                {
+                    _logger.LogWarning($"No greeting found with ID: {id}");
+                    return false;
+                }
+                greeting.GreetingMessage = modifiedGreeting.GreetingMessage;
+              
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Exception occurred while updating greeting message in the Database: {e.Message}");
+                return false;
+            }
+        }
+
+
+
     }
 }
