@@ -188,7 +188,11 @@ public class HelloGreetingController : ControllerBase
             return BadRequest(response);
         }
     }
-
+    /// <summary>
+    /// Post method to save the greeting message to the Database
+    /// </summary>
+    /// <param name="greeting"></param>
+    /// <returns>returns a Greeting message which is savend in the database</returns>
     [HttpPost]
     [Route("SaveGreetings")]
     public IActionResult Post(SaveGreetingModel greeting)
@@ -215,5 +219,28 @@ public class HelloGreetingController : ControllerBase
         }
     }
 
-
+    [HttpPost]
+    [Route("GetGreetingById")]
+    public IActionResult Post(GreetByIdModel iD)
+    {
+        try
+        {
+            _logger.LogInformation("Get Greeting By Id method called");
+            ResponseModel<string> response = new ResponseModel<string>();
+            string greeting = _greetingBl.GetGreetingByIdBL(iD);
+            response.Message = "Get method successfully applied";
+            response.Success = true;
+            response.Data = greeting;
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Exception Occured in GetGreeting {e.Message}");
+            ResponseModel<string> response = new ResponseModel<string>();
+            response.Message = "Get method failed";
+            response.Success = false;
+            response.Data = e.Message;
+            return BadRequest(response);
+        }
+    }
 }

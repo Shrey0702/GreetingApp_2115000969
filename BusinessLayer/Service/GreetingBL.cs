@@ -73,5 +73,19 @@ namespace BusinessLayer.Service
                 return e.ToString();
             }
         }
+
+        public string GetGreetingByIdBL(GreetByIdModel iD)
+        {
+            try
+            {
+                _logger.LogInformation("Trying to get the greeting message by Id");
+                return greetingRL.GetGreetingByIdRL(iD);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Exception Occured while getting greeting message by Id {e.Message}");
+                return e.ToString();
+            }
+        }
     }
 }

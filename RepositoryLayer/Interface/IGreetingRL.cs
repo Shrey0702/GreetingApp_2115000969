@@ -9,6 +9,7 @@ namespace RepositoryLayer.Interface
 {
     public interface IGreetingRL
     {
+        string GetGreetingByIdRL(GreetByIdModel greetingID);
         public string GetGreetingRL();
         public string SaveGreetingRL(SaveGreetingModel greeting);
     }
