@@ -120,6 +120,7 @@ namespace RepositoryLayer.Service
                     return false;
                 }
                 greeting.GreetingMessage = modifiedGreeting.GreetingMessage;
+                _context.SaveChanges();
               
                 return true;
             }
