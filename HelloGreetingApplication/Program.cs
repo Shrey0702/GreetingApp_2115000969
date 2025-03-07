@@ -4,12 +4,20 @@ using Microsoft.EntityFrameworkCore;
 using RepositoryLayer.Interface;
 using RepositoryLayer.Service;
 using RepositoryLayer.Context;
+using Midddleware.GlobalExceptionHandling;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    // Add global exception filter
+    options.Filters.Add<GlobalExceptionFilter>();
+});
+
+
 
 // for NLOGGING
 builder.Logging.ClearProviders();
@@ -37,7 +45,9 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+
 app.UseHttpsRedirection();
+app.UseMiddleware<Middlerware.GlobalExceptionHandling.ExceptionHandlerMiddleware>();
 
 
 app.UseSwagger();
