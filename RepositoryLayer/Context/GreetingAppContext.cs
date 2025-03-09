@@ -14,5 +14,6 @@ namespace RepositoryLayer.Context
         }
 
         public virtual DbSet<Entity.GreetingEntity> GreetingEntities { get; set; } = null!;
+        public DbSet<Entity.UserEntity> UserEntities { get; set; } = null!;
     }
 }
