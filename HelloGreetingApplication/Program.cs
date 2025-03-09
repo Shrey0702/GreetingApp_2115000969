@@ -6,6 +6,9 @@ using RepositoryLayer.Service;
 using RepositoryLayer.Context;
 using Midddleware.GlobalExceptionHandling;
 using Middleware.HashingAlgo;
+using Middleware.TokenGeneration;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +41,25 @@ builder.Services.AddScoped<IGreetingRL, GreetingRL>();
 builder.Services.AddScoped<IUserBL, UserBL>();
 builder.Services.AddScoped<IUserRL, UserRL>();
 builder.Services.AddScoped<IHashingService, HashingService>();
+builder.Services.AddSingleton<IJwtService, JwtService>();
 
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true
+        };
+    });
 // Configure the HTTP request pipeline.
 
 
@@ -60,7 +81,7 @@ app.UseSwaggerUI();//reponsible for the colorfulness
 
 // Configure the HTTP request pipeline.
 
-
+builder.Services.AddAuthorization();
 app.UseAuthorization();
 
 app.MapControllers();

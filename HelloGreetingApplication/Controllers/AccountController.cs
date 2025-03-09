@@ -63,7 +63,8 @@ namespace HelloGreetingApplication.Controllers
                     Success = response.Success,
                     FirstName = response.FirstName,
                     LastName = response.LastName,
-                    Email = response.Email
+                    Email = response.Email,
+                    Token = response.Token
                 }
             };
             return Ok(loginResponse);
