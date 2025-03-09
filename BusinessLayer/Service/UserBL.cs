@@ -34,5 +34,17 @@ namespace BusinessLayer.Service
             var response = _userRL.RegisterUserRL(newUser);
             return response;
         }
+
+        public async Task<bool> ForgetPasswordAsync(string email)
+        {
+            _logger.LogInformation("Business Layer: Initiating password reset");
+            return await _userRL.ForgetPasswordAsync(email);
+        }
+
+        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            _logger.LogInformation("Business Layer: Initiating password reset validation");
+            return await _userRL.ResetPassword(token, newPassword);
+        }
     }
 }

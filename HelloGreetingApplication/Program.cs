@@ -9,6 +9,7 @@ using Middleware.HashingAlgo;
 using Middleware.TokenGeneration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Middleware.SMTP;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +43,7 @@ builder.Services.AddScoped<IUserBL, UserBL>();
 builder.Services.AddScoped<IUserRL, UserRL>();
 builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 builder.Services.AddAuthentication("Bearer")

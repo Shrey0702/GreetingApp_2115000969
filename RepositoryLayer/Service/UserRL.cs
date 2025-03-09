@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Middleware.HashingAlgo;
+using Middleware.SMTP;
 using Middleware.TokenGeneration;
 using ModelLayer.DTO;
 using ModelLayer.Model;
@@ -17,13 +19,15 @@ namespace RepositoryLayer.Service
         private readonly ILogger<UserRL> _logger;
         private readonly IHashingService _hashingService;
         private readonly IJwtService _jwtService;
+        private readonly IEmailService _emailService;
 
-        public UserRL(GreetingAppContext userDbContext, ILogger<UserRL> logger, IHashingService hashingService, IJwtService jwtService)
+        public UserRL(GreetingAppContext userDbContext, ILogger<UserRL> logger, IHashingService hashingService, IJwtService jwtService, IEmailService emailService)
         {
             _userDbContext = userDbContext;
             _logger = logger;
             _hashingService = hashingService;
             _jwtService = jwtService;
+            _emailService = emailService;
         }
 
         public AccountLoginResponse LoginUserRL(LoginDTO loginDTO)
@@ -116,5 +120,45 @@ namespace RepositoryLayer.Service
                 Email = userEntity.Email
             };
         }
+
+        public async Task<bool> ForgetPasswordAsync(string email)
+        {
+            _logger.LogInformation("Attempting password reset");
+            var user = _userDbContext.UserEntities.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+            {
+                _logger.LogError("User not found for email : " + email);
+                return false;
+            }
+            var token = _jwtService.GenerateResetPasswordToken(email);
+            await _emailService.SendResetPasswordEmailAsync(email, token);
+
+            return true;
+        }
+
+        public async Task<bool> ResetPassword(string token, string newPassword)
+        {
+            _logger.LogInformation("Attempting password reset");
+            if (!_jwtService.ValidateToken(token, out string email))
+            {
+                _logger.LogError("Password reset failed: Invalid or expired token");
+                return false; // Invalid or expired token
+            }
+
+            var user = _userDbContext.UserEntities.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+            {
+                _logger.LogError("Password reset failed: User not found");
+                return false; // User not found
+            }
+
+            // Hash new password
+            _logger.LogInformation("Password reset successful");
+            user.PasswordHash = _hashingService.HashPassword(newPassword);
+            _userDbContext.SaveChanges();
+
+            return true; // Password successfully reset
+        }
+
     }
 }

@@ -69,5 +69,37 @@ namespace HelloGreetingApplication.Controllers
             };
             return Ok(loginResponse);
         }
+
+        /// <summary>
+        /// Sends password reset email
+        /// </summary>
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO model)
+        {
+            _logger.LogInformation($"Received password reset request for email: {model.Email ?? "NULL"}");
+
+            _logger.LogInformation($"Received password reset request for email: {model.Email}");
+
+            var result = await _userBL.ForgetPasswordAsync(model.Email);
+            if (result)
+                return Ok(new { Message = "Password reset email sent successfully." });
+
+            return BadRequest(new { Message = "Email not found in the system." });
+        }
+
+        /// <summary>
+        /// Resets password using token
+        /// </summary>
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
+        {
+            _logger.LogInformation($"Processing password reset request for token: {model.Token}");
+
+            var result = await _userBL.ResetPasswordAsync(model.Token, model.NewPassword);
+            if (result)
+                return Ok(new { Message = "Password reset successful." });
+
+            return BadRequest(new { Message = "Invalid or expired token." });
+        }
     }
 }

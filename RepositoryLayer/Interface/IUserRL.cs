@@ -12,5 +12,8 @@ namespace RepositoryLayer.Interface
     {
         public AccountLoginResponse LoginUserRL(LoginDTO loginDTO);
         public AccountLoginResponse RegisterUserRL(UserRegistrationModel newUser);
+        public Task<bool> ForgetPasswordAsync(string email);
+
+        public Task<bool> ResetPassword(string token, string newPassword);
     }
 }
