@@ -15,6 +15,7 @@ namespace BusinessLayer.Service
         private readonly string _hostname = "localhost";
         private readonly string _queue = "GreetingAppQueue";
 
+
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var factory = new ConnectionFactory() { HostName = _hostname };
