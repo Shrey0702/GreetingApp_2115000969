@@ -64,7 +64,7 @@ namespace RepositoryLayer.Service
             }
 
             _logger.LogInformation($"User {loginDTO.Email} logged in successfully.");
-            var token = _jwtService.GenerateToken(user.Email, user.FirstName, user.LastName);
+            var token = _jwtService.GenerateToken(user.UserId, user.Email, user.FirstName, user.LastName);
             return new AccountLoginResponse
             {
                 Message = "User Logged in Successfully",
@@ -139,7 +139,7 @@ namespace RepositoryLayer.Service
         public async Task<bool> ResetPassword(string token, string newPassword)
         {
             _logger.LogInformation("Attempting password reset");
-            if (!_jwtService.ValidateToken(token, out string email))
+            if (!_jwtService.ValidateToken(token, out int userId, out string email))
             {
                 _logger.LogError("Password reset failed: Invalid or expired token");
                 return false; // Invalid or expired token

@@ -54,7 +54,7 @@ namespace RepositoryLayer.Service
             return "Greetings from repository layer using GetGreeting get request from controller";
         }
 
-        public string SaveGreetingRL(SaveGreetingModel greeting)
+        public string SaveGreetingRL(SaveGreetingModel greeting, int userId)
         {
             _logger.LogInformation("Greetings from repository layer using SaveGreeting to save greetings in our database");
             try
@@ -62,7 +62,8 @@ namespace RepositoryLayer.Service
                 _logger.LogInformation("Trying to save greeting message to the Database");
                 GreetingEntity newGreeting = new GreetingEntity()
                 {
-                    GreetingMessage = greeting.GreetingMessage
+                    GreetingMessage = greeting.GreetingMessage,
+                    UserId = userId
                 };
                 _context.GreetingEntities.Add(newGreeting);
                 _context.SaveChanges();

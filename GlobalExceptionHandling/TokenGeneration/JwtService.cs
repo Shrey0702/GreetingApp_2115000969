@@ -20,15 +20,16 @@ namespace Middleware.TokenGeneration
         }
 
         /// <summary>
-        /// Generates a JWT Token for authentication.
+        /// Generates a JWT Token for authentication with UserId included.
         /// </summary>
-        public string GenerateToken(string email, string firstName, string lastName)
+        public string GenerateToken(int userId, string email, string firstName, string lastName)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
+                new Claim("UserId", userId.ToString()),  // Storing UserId
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Name, $"{firstName} {lastName}"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -69,10 +70,11 @@ namespace Middleware.TokenGeneration
         }
 
         /// <summary>
-        /// Validates the Reset Password Token and extracts the email.
+        /// Validates the JWT Token and extracts UserId & Email.
         /// </summary>
-        public bool ValidateToken(string token, out string email)
+        public bool ValidateToken(string token, out int userId, out string email)
         {
+            userId = 0;
             email = null;
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -93,7 +95,15 @@ namespace Middleware.TokenGeneration
                 };
 
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+
+                var userIdClaim = principal.FindFirst("UserId");
                 var emailClaim = principal.FindFirst(ClaimTypes.Email);
+
+                if (userIdClaim != null)
+                {
+                    userId = int.Parse(userIdClaim.Value);
+                }
+
                 email = emailClaim?.Value;
 
                 return true;

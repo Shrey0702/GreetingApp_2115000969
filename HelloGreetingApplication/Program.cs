@@ -10,9 +10,14 @@ using Middleware.TokenGeneration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Middleware.SMTP;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using StackExchange.Redis;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]));
 
 // Add services to the container.
 
@@ -29,6 +34,8 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
+
+// for databse connections
 var connectionString = builder.Configuration.GetConnectionString("SqlConnection");
 builder.Services.AddDbContext<GreetingAppContext>(options =>
     options.UseSqlServer(connectionString));
@@ -44,24 +51,30 @@ builder.Services.AddScoped<IUserRL, UserRL>();
 builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 
 
-builder.Services.AddAuthentication("Bearer")
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            ValidateLifetime = true
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Redis:ConnectionString"];
+    options.InstanceName = "GreetingApp_";
+});
+
 // Configure the HTTP request pipeline.
 
 
@@ -84,6 +97,7 @@ app.UseSwaggerUI();//reponsible for the colorfulness
 // Configure the HTTP request pipeline.
 
 builder.Services.AddAuthorization();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

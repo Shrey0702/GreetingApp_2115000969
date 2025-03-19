@@ -12,7 +12,7 @@ namespace RepositoryLayer.Interface
     {
         string GetGreetingByIdRL(GreetByIdModel greetingID);
         public string GetGreetingRL();
-        public string SaveGreetingRL(SaveGreetingModel greeting);
+        public string SaveGreetingRL(SaveGreetingModel greeting, int userId);
         public List<GreetingEntity> RetrieveAllGreetingsRL();
         public bool UpdateGreetingMessageRL(int id, SaveGreetingModel modifiedGreeting);
 

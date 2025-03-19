@@ -35,7 +35,7 @@ namespace RepositoryLayer.Migrations
 
                     b.HasKey("GreetingID");
 
-                    b.ToTable("GreetingEntities");
+                    b.ToTable("GreetingEntities", (string)null);
                 });
 
             modelBuilder.Entity("RepositoryLayer.Entity.UserEntity", b =>
@@ -64,7 +64,7 @@ namespace RepositoryLayer.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("UserEntities");
+                    b.ToTable("UserEntities", (string)null);
                 });
 #pragma warning restore 612, 618
         }

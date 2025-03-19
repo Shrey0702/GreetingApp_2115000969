@@ -5,8 +5,6 @@ using RepositoryLayer.Entity;
 using RepositoryLayer.Interface;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BusinessLayer.Service
@@ -14,115 +12,134 @@ namespace BusinessLayer.Service
     public class GreetingBL : IGreetingBL
     {
         private readonly ILogger<GreetingBL> _logger;
-
-        /// <summary>
-        /// Creating referance of IGreetingRL
-        /// </summary>
         private readonly IGreetingRL greetingRL;
+        private readonly IRedisCacheService _redisCacheService;
 
-        /// <summary>
-        /// Constructor for dependency injection
-        /// </summary>
-        /// <param name="greetingRL"></param>
-        public GreetingBL(IGreetingRL greetingRL, ILogger<GreetingBL> logger)
+        public GreetingBL(IGreetingRL greetingRL, ILogger<GreetingBL> logger, IRedisCacheService redisCacheService)
         {
             this.greetingRL = greetingRL;
             this._logger = logger;
-
+            this._redisCacheService = redisCacheService;
         }
 
-
-        public string GetGreetingBL()
+        public async Task<string> GetGreetingBL()
         {
             _logger.LogInformation("Trying to get the greeting message");
-            return greetingRL.GetGreetingRL();
+
+            string cacheKey = "Greeting_Message";
+            var cachedGreeting = await _redisCacheService.GetCacheAsync<string>(cacheKey);
+
+            if (cachedGreeting != null)
+            {
+                _logger.LogInformation("Returning greeting from Redis Cache");
+                return cachedGreeting;
+            }
+
+            var greeting = await Task.Run(() => greetingRL.GetGreetingRL()); // Ensure async execution
+            await _redisCacheService.SetCacheAsync(cacheKey, greeting, TimeSpan.FromMinutes(10));
+
+            return greeting;
         }
 
-        /// <summary>
-        /// Method to display the greeting message with user first name and last name
-        /// </summary>
-        /// <param name="greetUserModel"></param>
-        /// <returns></returns>
-
-        public string DisplayGreetingBL(GreetUserModel greetUserModel)
+        public async Task<string> DisplayGreetingBL(GreetUserModel greetUserModel)
         {
             _logger.LogInformation("Trying to display the greeting message");
-            if (greetUserModel.FirstName == string.Empty && greetUserModel.LastName == string.Empty)
+
+            if (string.IsNullOrWhiteSpace(greetUserModel.FirstName) && string.IsNullOrWhiteSpace(greetUserModel.LastName))
             {
                 return "Hello World!!";
             }
-            else
-            {
-                return $"Hello {greetUserModel.FirstName} {greetUserModel.LastName}";
-            }
+
+            return await Task.FromResult($"Hello {greetUserModel.FirstName} {greetUserModel.LastName}");
         }
-        /// <summary>
-        /// Method to save the greeting message to the Database
-        /// </summary>
-        /// <param name="greeting"></param>
-        /// <returns>returns the data which is saved in our database</returns>
-        public string SaveGreetingBL(SaveGreetingModel greeting)
+
+        public async Task<string> SaveGreetingBL(SaveGreetingModel greeting, int userId)
         {
             try
             {
                 _logger.LogInformation("Trying to save the greeting message");
-                return greetingRL.SaveGreetingRL(greeting);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"Exception Occured while saving greeting message to the Database {e.Message}");
-                return e.ToString();
-            }
-        }
-        /// <summary>
-        /// Method to get the greeting message by Id
-        /// </summary>
-        /// <param name="iD"></param>
-        /// <returns>returns the data which is saved in the database</returns>
-        public string GetGreetingByIdBL(GreetByIdModel iD)
-        {
-            try
-            {
-                _logger.LogInformation("Trying to get the greeting message by Id");
-                return greetingRL.GetGreetingByIdRL(iD);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"Exception Occured while getting greeting message by Id {e.Message}");
-                return e.ToString();
-            }
-        }
-        /// <summary>
-        /// Method to get all the greeting messages
-        /// </summary>
-        /// <returns>returns a string of all Greeting Messages</returns>
-        public List<GreetingEntity> GetAllGreetingsBL()
-        {
-            try
-            {
-                _logger.LogInformation("Trying to get all the greeting messages");
-                return greetingRL.RetrieveAllGreetingsRL();
 
+                string savedGreeting = await Task.Run(() => greetingRL.SaveGreetingRL(greeting, userId));
+
+                await _redisCacheService.RemoveCacheAsync("All_Greetings"); // Invalidate cache
+                return savedGreeting;
             }
             catch (Exception e)
             {
-                _logger.LogError($"Exception Occured while getting all greeting messages {e.Message}");
+                _logger.LogError($"Exception occurred while saving greeting: {e.Message}");
+                return e.ToString();
+            }
+        }
+
+        public async Task<string> GetGreetingByIdBL(GreetByIdModel iD)
+        {
+            try
+            {
+                _logger.LogInformation("Trying to get greeting message by Id");
+
+                string cacheKey = $"Greeting_{iD.Id}";
+                var cachedGreeting = await _redisCacheService.GetCacheAsync<string>(cacheKey);
+
+                if (cachedGreeting != null)
+                {
+                    _logger.LogInformation("Returning greeting from Redis Cache");
+                    return cachedGreeting;
+                }
+
+                var greeting = await Task.Run(() => greetingRL.GetGreetingByIdRL(iD));
+                await _redisCacheService.SetCacheAsync(cacheKey, greeting, TimeSpan.FromMinutes(10));
+
+                return greeting;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Exception occurred while getting greeting by Id: {e.Message}");
+                return e.ToString();
+            }
+        }
+
+        public async Task<List<GreetingEntity>> GetAllGreetingsBL()
+        {
+            try
+            {
+                _logger.LogInformation("Trying to get all greeting messages");
+
+                string cacheKey = "All_Greetings";
+                var cachedGreetings = await _redisCacheService.GetCacheAsync<List<GreetingEntity>>(cacheKey);
+
+                if (cachedGreetings != null)
+                {
+                    _logger.LogInformation("Returning greetings from Redis Cache");
+                    return cachedGreetings;
+                }
+
+                var greetings = await Task.Run(() => greetingRL.RetrieveAllGreetingsRL());
+                await _redisCacheService.SetCacheAsync(cacheKey, greetings, TimeSpan.FromMinutes(10));
+
+                return greetings;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Exception occurred while getting all greetings: {e.Message}");
                 throw new Exception(e.Message);
             }
         }
-        /// <summary>
-        /// Method to update the greeting message by Id
-        /// </summary>
-        /// <param name="modifyById"></param>
-        /// <param name="modifiedGreeting"></param>
-        /// <returns>returns bool true if data is successfully modified</returns>
-        public bool UpdateGreetingMessageBL(int id, SaveGreetingModel modifiedGreeting)
+
+        public async Task<bool> UpdateGreetingMessageBL(int id, SaveGreetingModel modifiedGreeting)
         {
             try
             {
                 _logger.LogInformation("Trying to update greeting message by id");
-                return greetingRL.UpdateGreetingMessageRL(id, modifiedGreeting);
 
+                bool result = await Task.Run(() => greetingRL.UpdateGreetingMessageRL(id, modifiedGreeting));
+
+                if (result)
+                {
+                    await _redisCacheService.RemoveCacheAsync($"Greeting_{id}");
+                    await _redisCacheService.RemoveCacheAsync("All_Greetings"); // Invalidate cache
+                }
+
+                return result;
             }
             catch (Exception e)
             {
@@ -131,12 +148,21 @@ namespace BusinessLayer.Service
             }
         }
 
-        public bool DeleteGreetingMessageBL(int id)
+        public async Task<bool> DeleteGreetingMessageBL(int id)
         {
             try
             {
                 _logger.LogInformation("Trying to delete greeting message by id");
-                return greetingRL.DeleteGreetingMessageRL(id);
+
+                bool result = await Task.Run(() => greetingRL.DeleteGreetingMessageRL(id));
+
+                if (result)
+                {
+                    await _redisCacheService.RemoveCacheAsync($"Greeting_{id}");
+                    await _redisCacheService.RemoveCacheAsync("All_Greetings"); // Invalidate cache
+                }
+
+                return result;
             }
             catch (Exception e)
             {
@@ -144,6 +170,5 @@ namespace BusinessLayer.Service
                 return false;
             }
         }
-
     }
 }
