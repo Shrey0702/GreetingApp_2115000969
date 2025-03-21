@@ -13,13 +13,11 @@ public class HelloGreetingController : ControllerBase
 {
     private readonly IGreetingBL _greetingBl;
     private readonly ILogger<HelloGreetingController> _logger;
-    private readonly RabbitMQService _rabbitMQService;
 
-    public HelloGreetingController(IGreetingBL greetingBl, ILogger<HelloGreetingController> logger, RabbitMQService rabbitMQService)
+    public HelloGreetingController(IGreetingBL greetingBl, ILogger<HelloGreetingController> logger)
     {
         _greetingBl = greetingBl;
         _logger = logger;
-        _rabbitMQService = rabbitMQService;
     }
 
     [HttpGet]
@@ -28,7 +26,6 @@ public class HelloGreetingController : ControllerBase
         _logger.LogInformation("Get Greeting method called");
 
         var greeting = await _greetingBl.GetGreetingBL();
-        _rabbitMQService.PublishMessage("Fetched a greeting");
 
         return Ok(new ResponseModel<string>
         {
@@ -42,7 +39,6 @@ public class HelloGreetingController : ControllerBase
     public IActionResult Post(UserRegistrationModel userRegistration)
     {
         _logger.LogInformation("Post method called");
-        _rabbitMQService.PublishMessage("User registered: " + userRegistration.Email);
 
         return Ok(new ResponseModel<string>
         {
@@ -57,7 +53,6 @@ public class HelloGreetingController : ControllerBase
     {
         _logger.LogInformation("Trying to greet a user");
         var greeting = await _greetingBl.DisplayGreetingBL(greetUserModel);
-        _rabbitMQService.PublishMessage("User greeted: " + greetUserModel.FirstName);
 
         return Ok(new ResponseModel<string>
         {
@@ -79,7 +74,6 @@ public class HelloGreetingController : ControllerBase
         }
 
         var savedGreeting = await _greetingBl.SaveGreetingBL(greeting, userId);
-        _rabbitMQService.PublishMessage("Greeting saved for user: " + userId);
 
         return Ok(new ResponseModel<string>
         {
@@ -105,7 +99,6 @@ public class HelloGreetingController : ControllerBase
             });
         }
 
-        _rabbitMQService.PublishMessage("Greeting deleted with ID: " + id);
         return Ok(new ResponseModel<string>
         {
             Success = true,

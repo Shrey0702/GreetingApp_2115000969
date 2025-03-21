@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Interface;
+using BusinessLayer.Service;
 using Microsoft.AspNetCore.Mvc;
 using ModelLayer.DTO;
 using ModelLayer.Model;
@@ -11,11 +12,12 @@ namespace HelloGreetingApplication.Controllers
     {
         ILogger<AccountController> _logger;
         private readonly IUserBL _userBL;
-        public AccountController(ILogger<AccountController> logger, IUserBL userBL)
+        private readonly IRabbitMQService _rabbitMQService;
+        public AccountController(ILogger<AccountController> logger, IUserBL userBL, IRabbitMQService rabbitMQService)
         {
             _logger = logger;
             _userBL = userBL;
-
+            _rabbitMQService = rabbitMQService;
         }
         [HttpGet]
         public IActionResult Get()
@@ -46,6 +48,7 @@ namespace HelloGreetingApplication.Controllers
                     Email = response.Email
                 }
             };
+            _rabbitMQService.SendMessage($"{newUser.Email}, You have successfully Registered!");
             return Ok(registerResponse);
         }
 
@@ -67,6 +70,7 @@ namespace HelloGreetingApplication.Controllers
                     Token = response.Token
                 }
             };
+            _rabbitMQService.ReceiveMessage();
             return Ok(loginResponse);
         }
 

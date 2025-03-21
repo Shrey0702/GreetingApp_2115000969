@@ -52,8 +52,7 @@ builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
-builder.Services.AddSingleton<RabbitMQService>();
-builder.Services.AddHostedService<RabbitMQConsumerService>();
+builder.Services.AddScoped<IRabbitMQService, RabbitMQService>();
 
 
 
